@@ -1,13 +1,24 @@
 const express = require("express");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
+const cors = require("cors");
 
 const app = express();
+// เปิด CORS สำหรับทุก origin
+app.use(
+  cors({
+    origin: "*", // อนุญาตทุก origin
+    methods: ["GET", "POST"],
+    credentials: true, // รองรับการใช้งาน cookies และ credentials อื่นๆ
+  })
+);
+
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
     origin: "*", // เปิดให้เชื่อมต่อจากทุก domain หรือระบุ domain ที่อนุญาต
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
