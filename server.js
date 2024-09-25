@@ -25,6 +25,7 @@ const io = new Server(httpServer, {
 // Storage for users and rooms
 const users = {}; // เก็บ socket.id กับ username
 const rooms = {}; // เก็บ room กับรายชื่อผู้ที่อยู่ในห้องนั้น
+const color = {}; // เก็บ room กับรายชื่อผู้ที่อยู่ในห้องนั้น
 
 // WebSocket connection
 io.on("connection", (socket) => {
@@ -34,6 +35,7 @@ io.on("connection", (socket) => {
   socket.on("joinRoom", ({ username, room }) => {
     // บันทึกผู้ใช้และห้องที่พวกเขาเข้ามา
     users[socket.id] = username;
+    color[socket.id] = getRandomLightColor();
     socket.join(room);
 
     // เก็บห้องและผู้ใช้ในห้อง
@@ -54,7 +56,8 @@ io.on("connection", (socket) => {
   // เมื่อมีการส่งข้อความในห้องแชท
   socket.on("chatMessage", ({ room, message }) => {
     const username = users[socket.id];
-    io.to(room).emit("message", { username, message }); // ส่งข้อความไปยังทุกคนในห้อง
+    const userColor = color[socket.id];
+    io.to(room).emit("message", { username, message, userColor }); // ส่งข้อความไปยังทุกคนในห้อง
   });
 
   // เมื่อผู้ใช้ disconnect
@@ -78,3 +81,12 @@ io.on("connection", (socket) => {
 httpServer.listen(3001, () => {
   console.log("Socket.IO server running on port 3001");
 });
+
+const getRandomLightColor = () => {
+  const getLightValue = () => Math.floor(Math.random() * 128) + 128; // Generate a number between 128 and 255
+  const r = getLightValue();
+  const g = getLightValue();
+  const b = getLightValue();
+
+  return `rgb(${r}, ${g}, ${b})`;
+};
